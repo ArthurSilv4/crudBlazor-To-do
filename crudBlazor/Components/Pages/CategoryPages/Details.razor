@@ -1,0 +1,49 @@
+﻿@page "/categories/details"
+
+@using Microsoft.EntityFrameworkCore
+@using crudBlazor.Models
+@inject IDbContextFactory<crudBlazor.Data.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Detalhes</h1>
+
+<div>
+    <h4>Tarefa</h4>
+    <hr />
+    @if (category is null)
+    {
+        <p><em>Carregando...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Titulo:</dt>
+            <dd class="col-sm-10">@category.Title</dd>
+            <dt class="col-sm-2">Descrição:</dt>
+            <dd class="col-sm-10">@category.Description</dd>
+        </dl>
+        <div>
+            <a href="@($"/categories/edit?id={category.Id}")">Editar</a> |
+            <a href="@($"/categories")">Voltar para lista</a>
+        </div>
+    }
+</div>
+
+@code {
+    Category? category;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        category = await context.Categories.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (category is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

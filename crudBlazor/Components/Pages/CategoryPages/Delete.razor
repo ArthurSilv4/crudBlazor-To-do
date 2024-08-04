@@ -1,0 +1,61 @@
+﻿@page "/categories/delete"
+
+@using Microsoft.EntityFrameworkCore
+@using crudBlazor.Models
+@inject IDbContextFactory<crudBlazor.Data.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Deletar</h1>
+
+<h3>Tem certeza de que deseja deletar a tarefa?</h3>
+<div>
+    <h4>Terefa</h4>
+    <hr />
+    @if (category is null)
+    {
+        <p><em>Carregando...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Titulo:</dt>
+            <dd class="col-sm-10">@category.Title</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Description:</dt>
+            <dd class="col-sm-10">@category.Description</dd>
+        </dl>
+        <EditForm method="post" Model="category" OnValidSubmit="DeleteCategory" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(category is null)">Deletar</button> |
+            <a href="/categories">Voltar para lista</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    Category? category;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        category = await context.Categories.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (category is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task DeleteCategory()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Categories.Remove(category!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/categories");
+    }
+}

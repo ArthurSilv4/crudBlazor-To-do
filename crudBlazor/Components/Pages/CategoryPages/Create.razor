@@ -1,0 +1,51 @@
+﻿@page "/categories/create"
+
+@using Microsoft.EntityFrameworkCore
+@using crudBlazor.Models
+@inject IDbContextFactory<crudBlazor.Data.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Criar</h1>
+
+<h4>Tarefa</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Category" OnValidSubmit="AddCategory" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="title" class="form-label">Titulo:</label> 
+                <InputText id="title" @bind-Value="Category.Title" class="form-control" /> 
+                <ValidationMessage For="() => Category.Title" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="description" class="form-label">Descrição:</label> 
+                <InputText id="description" @bind-Value="Category.Description" class="form-control" /> 
+                <ValidationMessage For="() => Category.Description" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Criar</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/categories">Voltar para lista</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public Category Category { get; set; } = new();
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+    public async Task AddCategory()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Categories.Add(Category);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/categories");
+    }
+}
